@@ -5,13 +5,15 @@ import com.example.contacts.entity.Contact;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ContactRestService {
 
     @Autowired
@@ -44,11 +46,11 @@ public class ContactRestService {
         return contactRepository.save(c);
     }
 
-    @RequestMapping(value="/chercher/{mc}&{size}&{page}", method = RequestMethod.GET)
-    public Page<Contact> chercher(
-            @PathVariable("mc") String mc,
-            @PathVariable("page") int page,
-            @PathVariable("size") int size){
-        return contactRepository.chercher("%"+mc+"%", PageRequest.of(page, size));
+    @RequestMapping(value = "/chercher", method = RequestMethod.GET)
+    public Page<Contact> chercher(@RequestParam(name = "mc", defaultValue = "") String motCle,
+                                  @RequestParam(name = "page", defaultValue = "0") int page,
+                                  @RequestParam(name = "size", defaultValue = "5") int size) {
+        Pageable sortedById = PageRequest.of(page, size, Sort.by("id"));
+        return contactRepository.chercher("%" + motCle + "%", sortedById);
     }
 }
